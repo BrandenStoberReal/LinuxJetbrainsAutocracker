@@ -140,11 +140,13 @@ func main() {
 		log.Println("-----------------------------------------------------------------------------")
 		// Enum through products
 		for _, entry := range entries {
-			log.Printf("Found program to crack: %s", entry.Name())
-			binFolder := "/home/amnesia/.local/share/JetBrains/Toolbox/apps/" + entry.Name() + "/bin"
+			if entry.IsDir() {
+				log.Printf("Found program to crack: %s", entry.Name())
+				binFolder := "/home/amnesia/.local/share/JetBrains/Toolbox/apps/" + entry.Name() + "/bin"
 
-			crackProgram(entry.Name(), binFolder, netfilterJava, miscJava1, miscJava2)
-			log.Println("-----------------------------------------------------------------------------")
+				crackProgram(entry.Name(), binFolder, netfilterJava, miscJava1, miscJava2)
+				log.Println("-----------------------------------------------------------------------------")
+			}
 		}
 	}
 }
