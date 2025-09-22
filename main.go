@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -12,26 +13,26 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 	// Check if bin folder exists
 	_, err := os.Stat(binpath)
 	if err != nil {
-		log.Fatalln("Error finding Jetbrains binaries.")
+		log.Fatalln("No bin folder found. Is this a Jetbrains program? Skipping.")
 	}
 
 	// Update vmoptions
 	_, err = os.Stat(binpath + "/" + "jetbrains_client64.vmoptions")
 	if err != nil {
-		log.Fatalln("Error finding Jetbrains client vmoptions file.")
+		log.Fatalln("Jetbrains VMOptions not found. Is this a real Jetbrains product? Skipping.")
 	}
 
-	// Open the jetbrains file
-	file, err := os.Open(binpath + "/" + "jetbrains_client64.vmoptions")
+	// Open the jetbrains jetbrainsFile
+	jetbrainsFile, err := os.Open(binpath + "/" + "jetbrains_client64.vmoptions")
 	if err != nil {
-		log.Fatalln("Error opening Jetbrains client vmoptions file.")
+		log.Fatalf("Error opening Jetbrains client vmoptions jetbrainsFile: %s", err.Error())
 	}
-	defer file.Close()
+	defer jetbrainsFile.Close()
 
 	// Read options data
-	contents, err := io.ReadAll(file)
+	contents, err := io.ReadAll(jetbrainsFile)
 	if err != nil {
-		log.Fatalln("Error reading Jetbrains client vmoptions file.")
+		log.Fatalf("Error reading Jetbrains client vmoptions jetbrainsFile: %s", err.Error())
 	}
 
 	// Convert to string
@@ -39,49 +40,49 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 
 	// Check if we already cracked this file
 	if strings.Contains(contentsStr, filter) {
-		log.Println("Jetbrains client vmoptions file already cracked. Skipping.")
+		log.Println("Jetbrains Client VMOptions jetbrainsFile already cracked. Skipping.")
 	} else {
 		// Inject cracked agent
 		contentsStr = contentsStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
 
-		// Flush back to file
-		_, err = file.Write([]byte(contentsStr))
+		// Flush back to jetbrainsFile
+		_, err = jetbrainsFile.Write([]byte(contentsStr))
 		if err != nil {
-			log.Fatalln("Error writing Jetbrains client vmoptions file.")
+			log.Fatalf("Error writing Jetbrains client vmoptions jetbrainsFile: %s", err.Error())
 		} else {
-			log.Println("Jetbrains client vmoptions file successfully cracked.")
+			log.Println("Jetbrains client vmoptions jetbrainsFile successfully cracked.")
 		}
 	}
 
 	// Begin cracking the program-specific file
 	_, err = os.Stat(binpath + "/" + name + "64.vmoptions")
 	if err != nil {
-		log.Fatalln("Error finding program vmoptions file.")
+		log.Fatalf("Error finding program-specific vmoptions file: %s", err.Error())
 	}
 
 	// Open program vmoptions file
-	file, err = os.Open(binpath + "/" + name + "64.vmoptions")
+	programfile, err := os.Open(binpath + "/" + name + "64.vmoptions")
 	if err != nil {
-		log.Fatalln("Error opening program vmoptions file.")
+		log.Fatalln("Error opening program vmoptions jetbrainsFile.")
 	}
 
-	defer file.Close()
+	defer programfile.Close()
 
 	// Read all data from program vmoptions
-	contents, err = io.ReadAll(file)
+	contents, err = io.ReadAll(programfile)
 	if err != nil {
-		log.Fatalln("Error reading program vmoptions file.")
+		log.Fatalf("Error reading program-specific vmoptions file: %s", err.Error())
 	}
 
 	// Check if we cracked already and crack if not.
 	contentsStr = string(contents)
 	if strings.Contains(contentsStr, filter) {
-		log.Println("Program vmoptions file already cracked. Skipping.")
+		log.Println("Program-specific vmoptions file already cracked. Skipping.")
 	} else {
 		contentsStr = contentsStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
-		_, err = file.Write([]byte(contentsStr))
+		_, err = programfile.Write([]byte(contentsStr))
 		if err != nil {
-			log.Fatalln("Error writing program vmoptions file.")
+			log.Fatalf("Error writing program vmoptions file: %s", err.Error())
 		} else {
 			log.Println("Program vmoptions file cracked.")
 		}
@@ -90,7 +91,7 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 
 func main() {
 	pathToCrack := flag.String("agent", "", "Path to a cracked netfilter agent")
-	pathToProgram := flag.String("program", "", "Path to Jetbrains program. Defaults to all.")
+	pathToProgram := flag.String("program", "", "Path to your Jetbrains program container directory. Defaults to the Linux toolbox install location. All jetbrains products in this directory will be cracked.")
 
 	flag.Parse()
 
@@ -107,42 +108,39 @@ func main() {
 	miscJava1 := "--add-opens=java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED"
 	miscJava2 := "--add-opens=java.base/jdk.internal.org.objectweb.asm.tree=ALL-UNNAMED"
 
+	// Determine toolbox path
 	if programPath == "" {
-		// Search in default parrot directory
-		_, err := os.Stat("/home/amnesia/.local/share/JetBrains/Toolbox/apps/")
+		// Fetch home directory
+		dirname, err := os.UserHomeDir()
 		if err != nil {
-			// Default folder does not exist
-			log.Println("Jetbrains Toolbox install directory not found! Please set manually from the CLI.")
-			os.Exit(1)
-		} else {
-			// Default folder exists
-			entries, err := os.ReadDir("/home/amnesia/.local/share/JetBrains/Toolbox/apps/")
-			if err != nil {
-				log.Fatalln("Error listing Jetbrains products.")
-			}
-
-			// Enum through products
-			for _, entry := range entries {
-				log.Printf("Found program to crack: %s", entry.Name())
-				binFolder := "/home/amnesia/.local/share/JetBrains/Toolbox/apps/" + entry.Name() + "/bin"
-
-				crackProgram(entry.Name(), binFolder, netfilterJava, miscJava1, miscJava2)
-			}
+			log.Fatal(err)
 		}
+		log.Printf("Your home dir is: %s!", dirname)
+		programPath, err = filepath.Abs(dirname + "/.local/share/JetBrains/Toolbox/apps/")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// Search in default parrot directory
+	_, err := os.Stat(programPath)
+	if err != nil {
+		// Default folder does not exist
+		log.Println("Jetbrains Toolbox install directory not found! Please set manually from the CLI.")
+		os.Exit(1)
 	} else {
-		if strings.Contains(programPath, "bin") {
-			fileinfo, err := os.Stat(programPath + "..")
-			if err != nil {
-				log.Fatalln("Error finding Jetbrains program folder.")
-			}
-			crackProgram(fileinfo.Name(), programPath, netfilterJava, miscJava1, miscJava2)
-		} else {
-			// Assume base root
-			fileinfo, err := os.Stat(programPath)
-			if err != nil {
-				log.Fatalln("Error finding Jetbrains program folder.")
-			}
-			crackProgram(fileinfo.Name(), programPath+"/bin", netfilterJava, miscJava1, miscJava2)
+		// Default folder exists
+		entries, err := os.ReadDir("/home/amnesia/.local/share/JetBrains/Toolbox/apps/")
+		if err != nil {
+			log.Fatalln("Error listing Jetbrains products.")
+		}
+
+		// Enum through products
+		for _, entry := range entries {
+			log.Printf("Found program to crack: %s", entry.Name())
+			binFolder := "/home/amnesia/.local/share/JetBrains/Toolbox/apps/" + entry.Name() + "/bin"
+
+			crackProgram(entry.Name(), binFolder, netfilterJava, miscJava1, miscJava2)
 		}
 	}
 }
