@@ -90,7 +90,7 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 }
 
 func main() {
-	pathToCrack := flag.String("agent", "", "Path to a cracked netfilter agent")
+	pathToCrack := flag.String("agent", "", "Path to a cracked netfilter agent.")
 	pathToProgram := flag.String("installDir", "", "Path to your Jetbrains program container directory. Defaults to the Linux toolbox install location. All jetbrains products in this directory will be cracked.")
 
 	flag.Parse()
@@ -103,7 +103,7 @@ func main() {
 		log.Fatal("No netfilter agent found! Please specify the path to a cracked agent JAR file.")
 	}
 
-	// Required arguments for crack to function
+	// Required strings for crack to function
 	netfilterJava := "-javaagent:" + netfilterPath + "=jetbrains"
 	miscJava1 := "--add-opens=java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED"
 	miscJava2 := "--add-opens=java.base/jdk.internal.org.objectweb.asm.tree=ALL-UNNAMED"
