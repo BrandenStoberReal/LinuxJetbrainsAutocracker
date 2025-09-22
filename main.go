@@ -25,14 +25,14 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 	// Open the jetbrains jetbrainsFile
 	jetbrainsFile, err := os.Open(binpath + "/" + "jetbrains_client64.vmoptions")
 	if err != nil {
-		log.Fatalf("Error opening Jetbrains client vmoptions jetbrainsFile: %s", err.Error())
+		log.Fatalf("Error opening Jetbrains Client VMOptions file: %s", err.Error())
 	}
 	defer jetbrainsFile.Close()
 
 	// Read options data
 	contents, err := io.ReadAll(jetbrainsFile)
 	if err != nil {
-		log.Fatalf("Error reading Jetbrains client vmoptions jetbrainsFile: %s", err.Error())
+		log.Fatalf("Error reading Jetbrains Client VMOtions file: %s", err.Error())
 	}
 
 	// Convert to string
@@ -40,7 +40,7 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 
 	// Check if we already cracked this file
 	if strings.Contains(contentsStr, filter) {
-		log.Println("Jetbrains Client VMOptions jetbrainsFile already cracked. Skipping.")
+		log.Println("Jetbrains Client VMOptions file already cracked. Skipping.")
 	} else {
 		// Inject cracked agent
 		contentsStr = contentsStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
@@ -50,7 +50,7 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 		if err != nil {
 			log.Fatalf("Error writing Jetbrains client vmoptions jetbrainsFile: %s", err.Error())
 		} else {
-			log.Println("Jetbrains client vmoptions jetbrainsFile successfully cracked.")
+			log.Println("Jetbrains client VMOptions file successfully cracked.")
 		}
 	}
 
