@@ -119,10 +119,12 @@ func main() {
 		programPath, err = filepath.Abs(dirname + "/.local/share/JetBrains/Toolbox/apps/")
 		if err != nil {
 			log.Fatal(err)
+		} else {
+			log.Println("Jetbrains Toolbox apps directory found! Beginning cracking...")
 		}
 	}
 
-	// Search in default parrot directory
+	// Search in default Linux toolbox dir
 	_, err := os.Stat(programPath)
 	if err != nil {
 		// Default folder does not exist
@@ -135,12 +137,14 @@ func main() {
 			log.Fatalln("Error listing Jetbrains products.")
 		}
 
+		log.Println("-----------------------------------------------------------------------------")
 		// Enum through products
 		for _, entry := range entries {
 			log.Printf("Found program to crack: %s", entry.Name())
 			binFolder := "/home/amnesia/.local/share/JetBrains/Toolbox/apps/" + entry.Name() + "/bin"
 
 			crackProgram(entry.Name(), binFolder, netfilterJava, miscJava1, miscJava2)
+			log.Println("-----------------------------------------------------------------------------")
 		}
 	}
 }
