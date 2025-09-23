@@ -80,10 +80,11 @@ func main() {
 
 	flag.Parse()
 
+	// Resolve pointers
 	netfilterPath := *pathToCrack
 	programPath := *pathToProgram
 
-	// Required argument
+	// Required argument check
 	if netfilterPath == "" {
 		log.Fatal("No netfilter agent provided! Please specify the path to a cracked agent JAR file.")
 	}
