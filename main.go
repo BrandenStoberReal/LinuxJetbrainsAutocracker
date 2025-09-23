@@ -85,7 +85,30 @@ func main() {
 
 	// Required argument
 	if netfilterPath == "" {
-		log.Fatal("No netfilter agent found! Please specify the path to a cracked agent JAR file.")
+		log.Fatal("No netfilter agent provided! Please specify the path to a cracked agent JAR file.")
+	}
+
+	// Check for netfilter
+	netfilterInfo, err := os.Stat(netfilterPath)
+	if err != nil {
+		log.Fatalf("Error finding netfilter path: %s", err.Error())
+	}
+
+	// Handle inference of jar file
+	if netfilterInfo.IsDir() {
+		oldnetPath := netfilterPath
+		netfilterPath, err = filepath.Abs(netfilterPath + "/ja-netfilter.jar")
+		if err != nil {
+			log.Fatalf("Error resolving absolute path for netfilter: %s", err.Error())
+		}
+
+		// Ensure netfilter exists
+		netfilterInfo, err = os.Stat(netfilterPath)
+		if err != nil {
+			log.Fatalf("Could not infer the netfilter jar from the provided folder. Does it exist?")
+		} else {
+			log.Printf("Found netfilter jar in %s", oldnetPath)
+		}
 	}
 
 	// Required strings for crack to function
@@ -110,7 +133,7 @@ func main() {
 	}
 
 	// Search in default Linux toolbox dir
-	_, err := os.Stat(programPath)
+	_, err = os.Stat(programPath)
 	if err != nil {
 		// Default folder does not exist
 		log.Println("Jetbrains Toolbox install directory not found! Please set manually from the CLI.")
