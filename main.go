@@ -142,7 +142,7 @@ func main() {
 		// Default folder exists
 		entries, err := os.ReadDir("/home/amnesia/.local/share/JetBrains/Toolbox/apps/")
 		if err != nil {
-			log.Fatalln("Error listing Jetbrains products.")
+			log.Fatalf("Error listing Jetbrains products: %s", err.Error())
 		}
 
 		log.Println("-----------------------------------------------------------------------------")
