@@ -18,31 +18,31 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 	// Update vmoptions
 	_, err = os.Stat(binpath + "/" + "jetbrains_client64.vmoptions")
 	if err != nil {
-		log.Fatalln("Jetbrains .vmoptions not found. Is this a real Jetbrains product? Skipping.")
-	}
-
-	// Open the jetbrains file
-	jetbrainsFileBuffer, err := os.ReadFile(binpath + "/" + "jetbrains_client64.vmoptions")
-	if err != nil {
-		log.Fatalf("Error opening Jetbrains client .vmoptions file: %s", err.Error())
-	}
-
-	// Convert to string
-	jetbrainsContentStr := string(jetbrainsFileBuffer)
-
-	// Check if we already cracked this file
-	if strings.Contains(jetbrainsContentStr, filter) {
-		log.Println("Jetbrains client .vmoptions file already cracked. Skipping.")
+		log.Println("Jetbrains .vmoptions not found! Is this a real Jetbrains product? Skipping.")
 	} else {
-		// Inject cracked agent
-		jetbrainsContentStr = jetbrainsContentStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
-
-		// Flush back to jetbrainsFile
-		err = os.WriteFile(binpath+"/"+"jetbrains_client64.vmoptions", []byte(jetbrainsContentStr), 0644)
+		// Open the jetbrains file
+		jetbrainsFileBuffer, err := os.ReadFile(binpath + "/" + "jetbrains_client64.vmoptions")
 		if err != nil {
-			log.Fatalf("Error writing Jetbrains client .vmoptions file: %s", err.Error())
+			log.Fatalf("Error opening Jetbrains client .vmoptions file: %s", err.Error())
+		}
+
+		// Convert to string
+		jetbrainsContentStr := string(jetbrainsFileBuffer)
+
+		// Check if we already cracked this file
+		if strings.Contains(jetbrainsContentStr, filter) {
+			log.Println("Jetbrains client .vmoptions file already cracked. Skipping.")
 		} else {
-			log.Println("Jetbrains client .vmoptions file successfully cracked.")
+			// Inject cracked agent
+			jetbrainsContentStr = jetbrainsContentStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
+
+			// Flush back to jetbrainsFile
+			err = os.WriteFile(binpath+"/"+"jetbrains_client64.vmoptions", []byte(jetbrainsContentStr), 0644)
+			if err != nil {
+				log.Fatalf("Error writing Jetbrains client .vmoptions file: %s", err.Error())
+			} else {
+				log.Println("Jetbrains client .vmoptions file successfully cracked.")
+			}
 		}
 	}
 
@@ -50,26 +50,26 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 	_, err = os.Stat(binpath + "/" + name + "64.vmoptions")
 	if err != nil {
 		log.Fatalf("Error finding program-specific .vmoptions file: %s", err.Error())
-	}
-
-	// Open program vmoptions file
-	programFileBuffer, err := os.ReadFile(binpath + "/" + name + "64.vmoptions")
-	if err != nil {
-		log.Fatalln("Error opening program .vmoptions jetbrainsFile.")
-	}
-
-	// Check if we cracked already and crack if not.
-	programContentsStr := string(programFileBuffer)
-
-	if strings.Contains(programContentsStr, filter) {
-		log.Println("Program-specific .vmoptions file already cracked. Skipping.")
 	} else {
-		programContentsStr = programContentsStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
-		err = os.WriteFile(binpath+"/"+name+"64.vmoptions", []byte(programContentsStr), 0644)
+		// Open program vmoptions file
+		programFileBuffer, err := os.ReadFile(binpath + "/" + name + "64.vmoptions")
 		if err != nil {
-			log.Fatalf("Error writing program-specific .vmoptions file: %s", err.Error())
+			log.Fatalln("Error opening program .vmoptions jetbrainsFile.")
+		}
+
+		// Check if we cracked already and crack if not.
+		programContentsStr := string(programFileBuffer)
+
+		if strings.Contains(programContentsStr, filter) {
+			log.Println("Program-specific .vmoptions file already cracked. Skipping.")
 		} else {
-			log.Println("Program .vmoptions file cracked.")
+			programContentsStr = programContentsStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
+			err = os.WriteFile(binpath+"/"+name+"64.vmoptions", []byte(programContentsStr), 0644)
+			if err != nil {
+				log.Fatalf("Error writing program-specific .vmoptions file: %s", err.Error())
+			} else {
+				log.Println("Program .vmoptions file cracked.")
+			}
 		}
 	}
 }
