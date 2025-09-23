@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,31 +21,24 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 		log.Fatalln("Jetbrains .vmoptions not found. Is this a real Jetbrains product? Skipping.")
 	}
 
-	// Open the jetbrains jetbrainsFile
-	jetbrainsFile, err := os.Open(binpath + "/" + "jetbrains_client64.vmoptions")
+	// Open the jetbrains file
+	jetbrainsFileBuffer, err := os.ReadFile(binpath + "/" + "jetbrains_client64.vmoptions")
 	if err != nil {
 		log.Fatalf("Error opening Jetbrains client .vmoptions file: %s", err.Error())
 	}
-	defer jetbrainsFile.Close()
-
-	// Read options data
-	contents, err := io.ReadAll(jetbrainsFile)
-	if err != nil {
-		log.Fatalf("Error reading Jetbrains client .vmoptions file: %s", err.Error())
-	}
 
 	// Convert to string
-	contentsStr := string(contents)
+	jetbrainsContentStr := string(jetbrainsFileBuffer)
 
 	// Check if we already cracked this file
-	if strings.Contains(contentsStr, filter) {
+	if strings.Contains(jetbrainsContentStr, filter) {
 		log.Println("Jetbrains client .vmoptions file already cracked. Skipping.")
 	} else {
 		// Inject cracked agent
-		contentsStr = contentsStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
+		jetbrainsContentStr = jetbrainsContentStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
 
 		// Flush back to jetbrainsFile
-		_, err = jetbrainsFile.Write([]byte(contentsStr))
+		err = os.WriteFile(binpath+"/"+"jetbrains_client64.vmoptions", []byte(jetbrainsContentStr), 0644)
 		if err != nil {
 			log.Fatalf("Error writing Jetbrains client .vmoptions file: %s", err.Error())
 		} else {
@@ -61,26 +53,19 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 	}
 
 	// Open program vmoptions file
-	programfile, err := os.Open(binpath + "/" + name + "64.vmoptions")
+	programFileBuffer, err := os.ReadFile(binpath + "/" + name + "64.vmoptions")
 	if err != nil {
 		log.Fatalln("Error opening program .vmoptions jetbrainsFile.")
 	}
 
-	defer programfile.Close()
-
-	// Read all data from program vmoptions
-	contents, err = io.ReadAll(programfile)
-	if err != nil {
-		log.Fatalf("Error reading program-specific .vmoptions file: %s", err.Error())
-	}
-
 	// Check if we cracked already and crack if not.
-	contentsStr = string(contents)
-	if strings.Contains(contentsStr, filter) {
+	programContentsStr := string(programFileBuffer)
+
+	if strings.Contains(programContentsStr, filter) {
 		log.Println("Program-specific .vmoptions file already cracked. Skipping.")
 	} else {
-		contentsStr = contentsStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
-		_, err = programfile.Write([]byte(contentsStr))
+		programContentsStr = programContentsStr + "\n" + filter + "\n" + misc1 + "\n" + misc2
+		err = os.WriteFile(binpath+"/"+name+"64.vmoptions", []byte(programContentsStr), 0644)
 		if err != nil {
 			log.Fatalf("Error writing program-specific .vmoptions file: %s", err.Error())
 		} else {
