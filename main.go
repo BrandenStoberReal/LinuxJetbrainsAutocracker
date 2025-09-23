@@ -75,7 +75,7 @@ func crackProgram(name string, binpath string, filter string, misc1 string, misc
 }
 
 func main() {
-	pathToCrack := flag.String("agent", "", "Path to a cracked netfilter agent.")
+	pathToCrack := flag.String("agent", "", "Path to the JAR file of a cracked netfilter agent.")
 	pathToProgram := flag.String("installDir", "", "Path to your Jetbrains program container directory. Defaults to the Linux toolbox install location. All jetbrains products in this directory will be cracked.")
 
 	flag.Parse()
