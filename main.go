@@ -137,8 +137,7 @@ func main() {
 	_, err = os.Stat(programPath)
 	if err != nil {
 		// Default folder does not exist
-		log.Println("Jetbrains Toolbox install directory not found! Please set manually from the CLI.")
-		os.Exit(1)
+		log.Fatalln("Jetbrains Toolbox install directory not found! Please set manually from the CLI.")
 	} else {
 		// Default folder exists
 		entries, err := os.ReadDir("/home/amnesia/.local/share/JetBrains/Toolbox/apps/")
